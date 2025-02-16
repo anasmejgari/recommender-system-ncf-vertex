@@ -19,7 +19,7 @@ jobs:
         needs: [lock_checking]
         strategy:
             matrix:
-                python-version: [3.8, 3.9, 3.10]
+                python-version: [3.11, 3.12, 3.13]
         steps:
         - uses: actions/checkout@v4
         - uses: actions/setup-python@v4  
@@ -33,7 +33,7 @@ jobs:
         needs: [lock_checking]
         strategy:
             matrix:
-                python-version: [3.8, 3.9, 3.10]
+                python-version: [3.11, 3.12, 3.13]
         steps:
         - uses: actions/checkout@v4
         - uses: actions/setup-python@v4  
@@ -47,7 +47,7 @@ jobs:
         needs: [lock_checking]
         strategy:
             matrix:
-                python-version: [3.8, 3.9, 3.10]
+                python-version: [3.11, 3.12, 3.13]
         steps:
         - uses: actions/checkout@v4
         - uses: actions/setup-python@v4  
@@ -58,10 +58,10 @@ jobs:
 
     tests:
         runs-on: ubuntu-latest
-        needs: [lock_checking]
+        needs: [linting, formatting, types]
         strategy:
             matrix:
-                python-version: [3.8, 3.9, 3.10]
+                python-version: [3.11, 3.12, 3.13]
         steps:
         - uses: actions/checkout@v4
         - uses: actions/setup-python@v4  
