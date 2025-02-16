@@ -1,22 +1,25 @@
-import torch.nn as nn
 import torch
+import torch.nn as nn
+from torch import Tensor
 
 
-class NeuralCollaborativeFilteringRecommender(nn.Module):
-
+class NCFRecommender(nn.Module):
     def __init__(
         self,
         num_users: int,
         num_items: int,
-        embedding_dim: int,
-        hidden_layers_size=[64, 32, 8],
+        embedding_dim,
+        hidden_layers_size: list[int] | None = None,
     ) -> None:
-        super(NeuralCollaborativeFilteringRecommender, self).__init__()
+        super().__init__()
 
         self.num_users = num_users
         self.num_items = num_items
         self.embedding_dim = embedding_dim
-        self.hidden_layers_size = hidden_layers_size
+        if hidden_layers_size:
+            self.hidden_layers_size = hidden_layers_size
+        else:
+            self.hidden_layers_size = [64, 32, 8]
 
         # Embeddings
         self.user_embedding = nn.Embedding(self.num_users, self.embedding_dim)
@@ -40,7 +43,7 @@ class NeuralCollaborativeFilteringRecommender(nn.Module):
             in_features=final_layer_input_size, out_features=1
         )
 
-    def forward(self, user_indices, item_indices):
+    def forward(self, user_indices: Tensor, item_indices: Tensor) -> Tensor:
         user_embeddings = self.user_embedding(user_indices)
         item_embeddings = self.item_embedding(item_indices)
 
@@ -52,8 +55,8 @@ class NeuralCollaborativeFilteringRecommender(nn.Module):
         mlp_output = self.mlp_layers(mlp_input)
 
         # Combining MLP & GMF
-        final_output = torch.cat([gmf_layer, mlp_output], dim=1)
+        final_output: Tensor = torch.cat([gmf_layer, mlp_output], dim=1)
         final_output = self.output_layer(final_output)
 
-        output = final_output.squeeze()
+        output: Tensor = final_output.squeeze()
         return output

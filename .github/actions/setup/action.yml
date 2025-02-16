@@ -1,0 +1,7 @@
+name: "Install-UV"
+description: "Install UV for dependencies management."
+runs:
+  using: "composite"
+  steps:
+    - run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      shell: bash

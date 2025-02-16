@@ -12,6 +12,7 @@ dependencies = [
     "kfp>=2.10.1",
     "nox>=2025.2.9",
     "pandas>=2.2.3",
+    "safety>=3.3.0",
     "streamlit>=1.42.0",
     "torch>=2.6.0",
 ]
@@ -24,9 +25,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
-dev = [
-    "isort>=6.0.0",
-    "mypy>=1.15.0",
-    "pytest>=8.3.4",
-    "ruff>=0.9.5",
-]
+dev = ["isort>=6.0.0", "mypy>=1.15.0", "pytest>=8.3.4", "ruff>=0.9.5"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "UP", "B", "SIM", "I"]

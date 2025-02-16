@@ -1,6 +1,5 @@
 import streamlit as st
 
-
 user_profile = st.sidebar.text_input("Please provide a user profile ID: ")
 show_previously_watched = st.sidebar.checkbox(
     "Show previously watched movies", key="disabled"
