@@ -1,9 +1,13 @@
+"""Module for the NCF Recommender System."""
+
 import torch
 import torch.nn as nn
 from torch import Tensor
 
 
 class NCFRecommender(nn.Module):
+    """Class for the Neural Collaborative Recommender."""
+
     def __init__(
         self,
         num_users: int,
@@ -11,6 +15,14 @@ class NCFRecommender(nn.Module):
         embedding_dim,
         hidden_layers_size: list[int] | None = None,
     ) -> None:
+        """Initialize of the class.
+
+        Args:
+            num_users (int): The number of users in the datasets
+            num_items (int): The number of items in the datasets
+            embedding_dim (_type_): The dimension of embeddings.
+            hidden_layers_size (list[int] | None): list of hidden layers in MLP part.
+        """
         super().__init__()
 
         self.num_users = num_users
@@ -26,7 +38,7 @@ class NCFRecommender(nn.Module):
         self.item_embedding = nn.Embedding(self.num_items, self.embedding_dim)
 
         # MLP Layers
-        mlp_layers = []
+        mlp_layers: list[nn.Module] = []
         input_size = self.embedding_dim * 2
         for layer_size in self.hidden_layers_size:
             mlp_layers.append(
@@ -44,6 +56,15 @@ class NCFRecommender(nn.Module):
         )
 
     def forward(self, user_indices: Tensor, item_indices: Tensor) -> Tensor:
+        """Execute a forward pass of the model.
+
+        Args:
+            user_indices (Tensor): Tensor of user's indices.
+            item_indices (Tensor): Tensor of item's indices
+
+        Returns:
+            Tensor: The resulting tensor.
+        """
         user_embeddings = self.user_embedding(user_indices)
         item_embeddings = self.item_embedding(item_indices)
 

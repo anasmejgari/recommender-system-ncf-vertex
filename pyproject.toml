@@ -31,4 +31,18 @@ dev = ["isort>=6.0.0", "mypy>=1.15.0", "pytest>=8.3.4", "ruff>=0.9.5"]
 line-length = 88
 
 [tool.ruff.lint]
-select = ["E", "F", "UP", "B", "SIM", "I"]
+select = [
+    "E",   #pycodestyle
+    "F",   #Pyflakes 
+    "UP",  #pyupgrade
+    "B",   #flake8-bugbear
+    "D",   #pydocstyle
+    "SIM", #flake8-simplify (SIM)
+    "I",   #isort
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+ignore_missing_imports = true

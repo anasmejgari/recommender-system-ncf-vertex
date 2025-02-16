@@ -1,3 +1,5 @@
+"""Module for the streamlit app of the frontend."""
+
 import streamlit as st
 
 user_profile = st.sidebar.text_input("Please provide a user profile ID: ")

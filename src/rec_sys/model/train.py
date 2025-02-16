@@ -1,7 +1,10 @@
+"""Module with function to train the model and preprocess datasets."""
+
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+from torch import device
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
@@ -10,14 +13,26 @@ from rec_sys.model.rating_dataset import RatingDataset
 
 
 def train_model(
-    model: nn.Module,
+    model: NCFRecommender,
     train_loader: DataLoader,
     validation_loader: DataLoader,
-    device: str,
+    device: device,
     epochs: int = 5,
     learning_rate: float = 0.001,
 ) -> NCFRecommender:
-    """Trains NeuMF with binary cross-entropy loss."""
+    """Train NCF model with MSE loss.
+
+    Args:
+        model (NCFRecommender): The model instance.
+        train_loader (DataLoader): The training loader for pytorch.
+        validation_loader (DataLoader): The validation loader for pytorch
+        device (device): The device type (cuda or cpu)
+        epochs (int): Number of training epoch. Defaults to 5.
+        learning_rate (float): Optimizer's learning rate. Defaults to 0.001.
+
+    Returns:
+        NCFRecommender: The trained model.
+    """
     optimizer = Adam(model.parameters(), lr=learning_rate)
     loss_fn = nn.MSELoss()
 
@@ -63,6 +78,15 @@ def train_model(
 def split_dataset(
     ratings: pd.DataFrame, threshold: int = 15
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Split dataset into compatible train and testing datasets.
+
+    Args:
+        ratings (pd.DataFrame): The ratings dataframe
+        threshold (int, optional): number of occurence to consider.
+
+    Returns:
+        tuple[pd.DataFrame, pd.DataFrame]: the training and test datasets.
+    """
     # Generate stats
     ratings_stats = ratings.groupby("userId").agg({"rating": ["count"]})
     ratings_stats.columns = ["num_ratings"]
@@ -90,7 +114,17 @@ def split_dataset(
 
 def load_data_and_train(
     ratings: pd.DataFrame, movies: pd.DataFrame, batch_size: int = 64
-) -> nn.Module:
+) -> NCFRecommender:
+    """Load and preprocess data, and train the model.
+
+    Args:
+        ratings (pd.DataFrame): the ratings dataset.
+        movies (pd.DataFrame): movies metadata
+        batch_size (int): batch size for training. Defaults to 64.
+
+    Returns:
+        NCFRecommender: The trained model.
+    """
     ratings_train, ratings_test = split_dataset(ratings=ratings)
     training_dataset = RatingDataset(ratings_train)
     test_dataset = RatingDataset(ratings_test)
