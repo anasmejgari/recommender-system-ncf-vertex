@@ -83,7 +83,7 @@ jobs:
         - name: Build the artifact
           run: uv build --wheel
         - name: Upload built artifacts
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
             name: wheel-artifact
             path: dist/*.whl
