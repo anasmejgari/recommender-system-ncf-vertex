@@ -88,6 +88,32 @@ jobs:
             name: wheel-artifact
             path: dist/*.whl
     
+    deploy:
+        runs-on: ubuntu-latest
+        needs: [build]
+        steps:
+            - uses: actions/checkout@v4
+            - name: Download built artifacts
+              uses: actions/download-artifact@v4
+              with:
+                name: wheel-artifact
+                path: dist
+            - name: Set up Python
+              uses: actions/setup-python@v4
+            - name: Install Twine
+              run: pip install twine
+            - name: Upload the artifact to google registry
+              env:
+                ARTIFACT_REGISTRY_PYPI_URL: ${{secrets.ARTIFACT_REGISTRY_PYPI_URL}}
+                GOOGLE_SERVICE_KEY: ${{secrets.GOOGLE_SERVICE_KEY}}
+              run: |
+                twine upload --repository-url "$ARTIFACT_REGISTRY_PYPI_URL" \
+                -u _json_key \
+                -p "$GOOGLE_SERVICE_KEY" \
+                dist/*.whl
+
+
+    
     
 
     
