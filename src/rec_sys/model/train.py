@@ -15,28 +15,26 @@ from rec_sys.model.rating_dataset import RatingDataset
 def train_model(
     model: NCFRecommender,
     train_loader: DataLoader,
-    validation_loader: DataLoader,
     device: device,
     epochs: int = 5,
     learning_rate: float = 0.001,
-) -> NCFRecommender:
+) -> tuple[NCFRecommender, float]:
     """Train NCF model with MSE loss.
 
     Args:
         model (NCFRecommender): The model instance.
         train_loader (DataLoader): The training loader for pytorch.
-        validation_loader (DataLoader): The validation loader for pytorch
         device (device): The device type (cuda or cpu)
         epochs (int): Number of training epoch. Defaults to 5.
         learning_rate (float): Optimizer's learning rate. Defaults to 0.001.
 
     Returns:
-        NCFRecommender: The trained model.
+        tuple[NCFRecommender, float]: the model and the training RMSE.
     """
     optimizer = Adam(model.parameters(), lr=learning_rate)
     loss_fn = nn.MSELoss()
 
-    for epoch in range(epochs):
+    for epoch in range(1, epochs + 1):
         model.train()  # Training mode
         total_train_loss = 0
         for users, items, labels in train_loader:
@@ -50,29 +48,46 @@ def train_model(
 
             total_train_loss += loss.item()
 
-        model.eval()
-        total_valid_loss = 0
-        with torch.no_grad():
-            for users, items, labels in validation_loader:
-                users, items, labels = (
-                    users.to(device),
-                    items.to(device),
-                    labels.to(device),
-                )
+        training_rmse = torch.sqrt(total_train_loss / len(train_loader))
 
-                target = model(users, items)
-                loss = loss_fn(target, labels)
-                total_valid_loss += loss.item()
+        print(f"Epoch {epoch}/{epochs}: RMSE = {training_rmse:.4f}.")
 
-        avg_train_loss = total_train_loss / len(train_loader)
-        avg_valid_loss = total_valid_loss / len(validation_loader)
-        print(
-            f"Epoch {epoch + 1}/{epochs}, "
-            f"Train Loss: {avg_train_loss:.4f}, "
-            f"Validation Loss: {avg_valid_loss:.4f}"
-        )
+    return model, training_rmse
 
-    return model
+
+def eval_model(model: NCFRecommender, ratings_test: pd.DataFrame) -> float:
+    """Evaluate a model.
+
+    Args:
+        model (NCFRecommender): The model to evaluate
+        ratings_test (pd.DataFrame): The test set used for evaluation
+
+    Returns:
+        float: the metric evaluation
+    """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Load test data to DataLoader for pytorch
+    test_dataset = RatingDataset(ratings_test)
+    test_loader = DataLoader(test_dataset, batch_size=len(test_dataset), shuffle=True)
+
+    model.eval()  # Set the model to evaluation mode
+    loss_fn = nn.MSELoss()  # Mean Square error
+    total_valid_loss = 0
+    with torch.no_grad():
+        for users, items, labels in test_loader:
+            users, items, labels = (
+                users.to(device),
+                items.to(device),
+                labels.to(device),
+            )
+
+            target = model(users, items)
+            loss = loss_fn(target, labels)
+            total_valid_loss += loss.item()
+
+    avg_valid_loss = torch.sqrt(total_valid_loss / len(test_loader))
+    print(f"RMSE for test set {avg_valid_loss}")
+    return avg_valid_loss
 
 
 def split_dataset(
@@ -113,34 +128,40 @@ def split_dataset(
 
 
 def load_data_and_train(
-    ratings: pd.DataFrame, movies: pd.DataFrame, batch_size: int = 64
-) -> NCFRecommender:
+    ratings_train: pd.DataFrame,
+    n_users: int,
+    n_movies: int,
+    embedding_dim: int = 64,
+    batch_size: int = 64,
+    epochs: int = 5,
+    learning_rate: float = 0.001,
+) -> tuple[NCFRecommender, float]:
     """Load and preprocess data, and train the model.
 
     Args:
-        ratings (pd.DataFrame): the ratings dataset.
-        movies (pd.DataFrame): movies metadata
-        batch_size (int): batch size for training. Defaults to 64.
+        ratings_train (pd.DataFrame): the ratings dataset.
+        n_users (int): Overall number of users.
+        n_movies (int): Overall number of movies
+        embedding_dim (int): dimension of embeddings of users and movies.
+        batch_size (int): Batch size used for training.
+        epochs (int): Nuulber of training epochs.
+        learning_rate (float): The learning rate for the optimizer.
 
     Returns:
-        NCFRecommender: The trained model.
+        tuple[NCFRecommender, float]: the model and the training RMSE.
     """
-    ratings_train, ratings_test = split_dataset(ratings=ratings)
     training_dataset = RatingDataset(ratings_train)
-    test_dataset = RatingDataset(ratings_test)
-
-    # Create DataLoader
     train_loader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
-
-    # N items & Users
-    num_users = ratings["userId"].nunique()
-    num_items = movies.index.nunique()
-    embdedding_dim = 64
 
     # Initialize the model
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = NCFRecommender(num_users, num_items, embdedding_dim).to(device)
-    model = train_model(model, train_loader, test_loader, device)
+    model = NCFRecommender(n_users, n_movies, embedding_dim).to(device)
+    model, training_rmse = train_model(
+        model,
+        train_loader,
+        device=device,
+        epochs=epochs,
+        learning_rate=learning_rate,
+    )
 
-    return model
+    return model, training_rmse

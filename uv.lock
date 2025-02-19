@@ -605,6 +605,15 @@ wheels = [
 ]
 
 [[package]]
+name = "joblib"
+version = "1.4.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/64/33/60135848598c076ce4b231e1b1895170f45fbcaeaa2c9d5e38b04db70c35/joblib-1.4.2.tar.gz", hash = "sha256:2382c5816b2636fbd20a09e0f4e9dad4736765fdfb7dca582943b9c1366b3f0e", size = 2116621 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/91/29/df4b9b42f2be0b623cbd5e2140cafcaa2bef0759a00b7b70104dcfe2fb51/joblib-1.4.2-py3-none-any.whl", hash = "sha256:06d478d5674cbc267e7496a410ee875abd68e4340feff4490bcb7afb88060ae6", size = 301817 },
+]
+
+[[package]]
 name = "jsonschema"
 version = "4.23.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1348,6 +1357,15 @@ wheels = [
 ]
 
 [[package]]
+name = "python-dotenv"
+version = "1.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bc/57/e84d88dfe0aec03b7a2d4327012c1627ab5f03652216c63d49846d7a6c58/python-dotenv-1.0.1.tar.gz", hash = "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca", size = 39115 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6a/3e/b68c118422ec867fa7ab88444e1274aa40681c606d59ac27de5a5588f082/python_dotenv-1.0.1-py3-none-any.whl", hash = "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a", size = 19863 },
+]
+
+[[package]]
 name = "python-levenshtein"
 version = "0.26.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1441,9 +1459,11 @@ dependencies = [
     { name = "google-cloud-aiplatform" },
     { name = "google-cloud-pipeline-components" },
     { name = "google-cloud-storage" },
+    { name = "joblib" },
     { name = "kfp" },
     { name = "nox" },
     { name = "pandas" },
+    { name = "python-dotenv" },
     { name = "safety" },
     { name = "streamlit" },
     { name = "torch" },
@@ -1463,9 +1483,11 @@ requires-dist = [
     { name = "google-cloud-aiplatform", specifier = ">=1.80.0" },
     { name = "google-cloud-pipeline-components", specifier = ">=2.18.0" },
     { name = "google-cloud-storage", specifier = ">=2.19.0" },
+    { name = "joblib", specifier = ">=1.4.2" },
     { name = "kfp", specifier = ">=2.10.1" },
     { name = "nox", specifier = ">=2025.2.9" },
     { name = "pandas", specifier = ">=2.2.3" },
+    { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "safety", specifier = ">=3.3.0" },
     { name = "streamlit", specifier = ">=1.42.0" },
     { name = "torch", specifier = ">=2.6.0" },

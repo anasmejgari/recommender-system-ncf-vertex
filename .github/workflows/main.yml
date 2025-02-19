@@ -93,24 +93,34 @@ jobs:
         needs: [build]
         steps:
             - uses: actions/checkout@v4
+            - name: Authenticate to Google Cloud
+              uses: google-github-actions/auth@v0.4.0
+              with: 
+                workload_identity_provider: 
+                  projects/${{secrets.GCP_PROJECT_NUMBER}}/locations/global/workloadIdentityPools/${{secrets.WIF_POOL_NAME}}/providers/${{secrets.WIF_PROVIDER_NAME}}
+                service_acocunt: 
+                  ${{secrets.WIF_SA_NAME}}@${{secrets.GCP_PROJECT_ID}}.iam.gserviceaccount.com
             - name: Download built artifacts
               uses: actions/download-artifact@v4
-              with:
+              with: 
                 name: wheel-artifact
                 path: dist
             - name: Set up Python
               uses: actions/setup-python@v4
             - name: Install Twine
               run: pip install twine
-            - name: Upload the artifact to google registry
-              env:
-                ARTIFACT_REGISTRY_PYPI_URL: ${{secrets.ARTIFACT_REGISTRY_PYPI_URL}}
-                GOOGLE_SERVICE_KEY: ${{secrets.GOOGLE_SERVICE_KEY}}
-              run: |
-                twine upload --repository-url "$ARTIFACT_REGISTRY_PYPI_URL" \
-                -u _json_key \
-                -p "$GOOGLE_SERVICE_KEY" \
-                dist/*.whl
+            # - name: Upload the artifact to google registry
+            #   env:
+            #     ARTIFACT_REGISTRY_PYPI_URL: ${{secrets.ARTIFACT_REGISTRY_PYPI_URL}}
+            #     GOOGLE_SERVICE_KEY: ${{secrets.GOOGLE_SERVICE_KEY}}
+            #   run: |
+            #     twine upload --repository-url "$ARTIFACT_REGISTRY_PYPI_URL" \
+            #     -u _json_key \
+            #     -p "$GOOGLE_SERVICE_KEY" \
+            #     dist/*.whl
+    
+    
+
 
 
     
