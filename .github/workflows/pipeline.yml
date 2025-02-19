@@ -51,7 +51,7 @@ jobs:
                     PROJECT=${{ secrets.GCP_PROJECT_ID }}
                     REPOSITORY=${{ secrets.PYTHON_REPOSETORY_NAME }}
                     PACKAGE_NAME=${{ secrets.PYTHON_PACKAGE_NAME }}
-                secret:
+                secret-files:
                     key_repo=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
                 tags: |
                     ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.DOCKER_REPO_NAME }}/rec-sys-app:v1.0
