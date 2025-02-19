@@ -31,7 +31,7 @@ jobs:
             uses: docker/login-action@v3
             with:
                 registry: gcr.io
-                username: oauth2accesstoken
+                username: _json_key
                 password: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
           
           - name: Set up QEMU
