@@ -50,9 +50,7 @@ jobs:
                 push: true
                 context: ./docker/
                 build-args: |
-                    LINK = ${{ secrets.LINK_REPO_PYTHON }}
-                    PROJECT=${{ secrets.GCP_PROJECT_ID }}
-                    REPOSITORY=${{ secrets.PYTHON_REPOSETORY_NAME }}
+                    LINK_REPO_PYTHON = ${{ secrets.LINK_REPO_PYTHON }}
                     PACKAGE_NAME=${{ secrets.PYTHON_PACKAGE_NAME }}
                 secret-files:
                     key_repo=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
