@@ -32,7 +32,7 @@ jobs:
             with:
                 registry: gcr.io
                 username: oauth2accesstoken
-                password: ${{ steps.auth.outputs.access_token }}
+                password: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
           
           - name: Set up QEMU
             uses: docker/setup-qemu-action@v2 
@@ -51,7 +51,7 @@ jobs:
                     REPOSITORY=${{ secrets.PYTHON_REPOSETORY_NAME }}
                     PACKAGE_NAME=${{ secrets.PYTHON_PACKAGE_NAME }}
                 secret-files:
-                    key_repo=${{ steps.auth.outputs.access_token }}
+                    key_repo=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
                 tags:
                     rec-sys-image:v1.0 
                     gcr.io/${{ secrets.GCP_PROJECT_ID }}/rec-sys-app:v1.0
