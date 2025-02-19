@@ -1,0 +1,58 @@
+name: python-packaging
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+jobs:
+    docker:
+        runs-on: ubuntu-latest
+        permissions:
+          contents: 'read'
+          id-token: 'write'
+
+        steps:
+          - uses: actions/checkout@v4
+        
+          - name: Authentificate to GCP
+            id: auth
+            uses: google-github-actions/auth@v2
+            with:
+              workload_identity_provider: 
+                projects/${{secrets.GCP_PROJECT_NUMBER}}/locations/global/workloadIdentityPools/${{secrets.WIF_POOL_NAME}}/providers/${{secrets.WIF_PROVIDER_NAME}}
+              service_account: 
+                "${{secrets.WIF_SA_NAME}}@${{secrets.GCP_PROJECT_ID}}.iam.gserviceaccount.com"
+              create_credentials_file: true
+              access_token_lifetime: 180
+
+          - name: Login to GCR
+            uses: docker/login-action@v3
+            with:
+                registry: gcr.io
+                username: oauth2accesstoken
+                password: ${{ steps.auth.outputs.access_token }}
+          
+          - name: Set up QEMU
+            uses: docker/setup-qemu-action@v2 
+               
+          - name: Set up Docker Buildx
+            uses: docker/setup-buildx-action@v2
+      
+          - name: Build Docker
+            uses: docker/build-push-action@v6
+            with:
+                push: true
+                context: ./docker/
+                build-args: |
+                    LOCATION = ${{ secrets.GCP_REGION }}
+                    PROJECT=${{ secrets.GCP_PROJECT_ID }}
+                    REPOSITORY=${{ secrets.PYTHON_REPOSETORY_NAME }}
+                    PACKAGE_NAME=${{ secrets.PYTHON_PACKAGE_NAME }}
+                secret-files:
+                    key_repo=${{ steps.auth.outputs.access_token }}
+                tags:
+                    rec-sys-image:v1.0 
+                    gcr.io/${{ secrets.GCP_PROJECT_ID }}/rec-sys-app:v1.0
+                
