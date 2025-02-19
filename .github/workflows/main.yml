@@ -119,7 +119,7 @@ jobs:
                 ARTIFACT_REGISTRY_PYPI_URL: ${{secrets.ARTIFACT_REGISTRY_PYPI_URL}}
               run: |
                 twine upload --repository-url "$ARTIFACT_REGISTRY_PYPI_URL" \
-                dist/*.whl
+                --verbose dist/*.whl
     
     
 
