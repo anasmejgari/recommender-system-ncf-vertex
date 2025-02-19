@@ -54,6 +54,5 @@ jobs:
                 secret-files:
                     key_repo=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
                 tags:
-                    rec-sys-image:v1.0 
-                    gcr.io/${{ secrets.GCP_PROJECT_ID }}/rec-sys-app:v1.0
-                
+                    ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secret.DOCKER_REPO_NAME }}/rec-sys-app:v1.0
+                    rec-sys-app:v1.0
