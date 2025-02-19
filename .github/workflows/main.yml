@@ -100,9 +100,9 @@ jobs:
               uses: google-github-actions/auth@v2
               with: 
                 workload_identity_provider: 
-                  "projects/${{secrets.GCP_PROJECT_NUMBER}}/locations/global/workloadIdentityPools/${{secrets.WIF_POOL_NAME}}/providers/${{secrets.WIF_PROVIDER_NAME}}"
+                  projects/${{secrets.GCP_PROJECT_NUMBER}}/locations/global/workloadIdentityPools/${{secrets.WIF_POOL_NAME}}/providers/${{secrets.WIF_PROVIDER_NAME}}
                 service_account: 
-                  "${{secrets.WIF_SA_NAME}}@${{secrets.GCP_PROJECT_ID}}.iam.gserviceaccount.com"
+                  artifact-writer@summer-reef-450313-k4.iam.gserviceaccount.com
                 create_credentials_file: true
                 access_token_lifetime: 60
             - name: Download built artifacts
