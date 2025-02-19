@@ -28,9 +28,6 @@ jobs:
               create_credentials_file: true
               access_token_lifetime: 180
 
-          - name: Echo path JSON
-            run: echo $GOOGLE_APPLICATION_CREDENTIALS
-
           - name: Login to GAR
             uses: docker/login-action@v3
             with:
@@ -58,4 +55,3 @@ jobs:
                     key_repo=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
                 tags: |
                     ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.DOCKER_REPO_NAME }}/rec-sys-app:v1.0
-                    rec-sys-app:v1.0
