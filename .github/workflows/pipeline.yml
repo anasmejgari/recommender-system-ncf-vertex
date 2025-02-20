@@ -26,7 +26,7 @@ jobs:
               service_account: 
                 "${{secrets.WIF_SA_NAME}}@${{secrets.GCP_PROJECT_ID}}.iam.gserviceaccount.com"
               create_credentials_file: true
-              access_token_lifetime: 180
+              access_token_lifetime: 600
             
           - name: credentials
             run: cat ${{env.GOOGLE_APPLICATION_CREDENTIALS}}  
