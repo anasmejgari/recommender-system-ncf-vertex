@@ -50,10 +50,7 @@ jobs:
                 push: true
                 context: ./docker/
                 build-args: |
-                    LOCATION=${{ secrets.GCP_REGION }}
                     PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
-                    REPO=${{ secrets.PYTHON_REPOSETORY_NAME }}
-                    PACKAGE_NAME=${{ secrets.PYTHON_PACKAGE_NAME }}
                 secret-files:
                     key_repo=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
                 tags: |
