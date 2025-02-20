@@ -148,8 +148,8 @@ jobs:
           - name: Build Docker
             run: docker build -t rec-sys-app:v1.0 \ 
                   --build-arg LOCATION=${{secrets.GCP_REGION}} \ 
-                  --build-arg PROJECT=${{secrets.GCP_PROJECT_ID}} \
-                  --build-arg REPOSITORY=${{secrets.PYTHON_REPOSETORY_NAME}} \
+                  --build-arg PROJECT_ID=${{secrets.GCP_PROJECT_ID}} \
+                  --build-arg REPO=${{secrets.PYTHON_REPOSETORY_NAME}} \
                   --build-arg PACKAGE_NAME=${{secrets.PYTHON_PACKAGE_NAME}} \
                   --secret id=key_repo,env=1   
 

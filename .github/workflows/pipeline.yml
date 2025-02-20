@@ -26,7 +26,7 @@ jobs:
               service_account: 
                 "${{secrets.WIF_SA_NAME}}@${{secrets.GCP_PROJECT_ID}}.iam.gserviceaccount.com"
               create_credentials_file: true
-              access_token_lifetime: 600
+              access_token_lifetime: 300
             
           - name: credentials
             run: cat ${{env.GOOGLE_APPLICATION_CREDENTIALS}}  
@@ -50,7 +50,9 @@ jobs:
                 push: true
                 context: ./docker/
                 build-args: |
-                    LINK_REPO_PYTHON = ${{ secrets.LINK_REPO_PYTHON }}
+                    LOCATION=${{ secrets.GCP_REGION }}
+                    PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+                    REPO=${{ secrets.PYTHON_REPOSETORY_NAME }}
                     PACKAGE_NAME=${{ secrets.PYTHON_PACKAGE_NAME }}
                 secret-files:
                     key_repo=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
