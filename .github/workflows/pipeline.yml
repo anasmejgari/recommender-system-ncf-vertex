@@ -51,6 +51,7 @@ jobs:
                 context: ./docker/
                 build-args: |
                     PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+                    PACKAGE_NAME=${{ secrets.PYTHON_PACKAGE_NAME }}
                 secret-files:
                     key_repo=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
                 tags: |
