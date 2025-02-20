@@ -9,4 +9,4 @@ RUN pip install keyrings.google-artifactregistry-auth
 
 RUN --mount=type=secret,id=key_repo,target=/run/secrets/credentials_gcp.json \ 
     GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/credentials_gcp.json \
-    pip install --extra-index-url https://_token:$(gcloud auth print-access-token)@europe-west2-python.pkg.dev/summer-reef-450313-k4/rec-sys/simple/ rec-sys
+    pip install --extra-index-url https://europe-west2-python.pkg.dev/summer-reef-450313-k4/rec-sys/simple/ rec-sys
