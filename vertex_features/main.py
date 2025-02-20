@@ -4,6 +4,7 @@ from kfp import compiler
 from components.config import GCP_PROJECT_ID, REPO_REGION
 from pipeline import rec_sys_pipeline
 
+
 if __name__ == "__main__":
     pipeline_filename = "mlplatform_pipeline.json"
     compiler.Compiler().compile(
