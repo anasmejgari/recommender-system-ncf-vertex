@@ -1,8 +1,8 @@
 name: python-packaging
 on:
-    # push:
-    #     branches:
-    #         - main
+    push:
+        branches:
+            - main
     pull_request:
         branches:
             - main
@@ -119,9 +119,8 @@ jobs:
                 twine upload --repository-url " ${{secrets.ARTIFACT_REGISTRY_PYPI_URL}}" \
                 --verbose dist/*.whl
     
-    docker:
+    dockerize:
         runs-on: ubuntu-latest
-        needs: deploy
         permissions:
           contents: 'read'
           id-token: 'write'
@@ -130,15 +129,27 @@ jobs:
           - uses: actions/checkout@v4
         
           - name: Authentificate to GCP
+            id: auth
             uses: google-github-actions/auth@v2
             with:
+              token_format: access_token
               workload_identity_provider: 
                 projects/${{secrets.GCP_PROJECT_NUMBER}}/locations/global/workloadIdentityPools/${{secrets.WIF_POOL_NAME}}/providers/${{secrets.WIF_PROVIDER_NAME}}
               service_account: 
                 "${{secrets.WIF_SA_NAME}}@${{secrets.GCP_PROJECT_ID}}.iam.gserviceaccount.com"
               create_credentials_file: true
-              access_token_lifetime: 180
+              access_token_lifetime: 1000
             
+          - name: credentials
+            run: cat ${{env.GOOGLE_APPLICATION_CREDENTIALS}}  
+
+          - name: Login to GAR
+            uses: docker/login-action@v3
+            with:
+                registry: ${{ secrets.GCP_REGION }}-docker.pkg.dev
+                username: oauth2accesstoken
+                password: ${{ steps.auth.outputs.access_token }}
+          
           - name: Set up QEMU
             uses: docker/setup-qemu-action@v2 
                
@@ -146,23 +157,16 @@ jobs:
             uses: docker/setup-buildx-action@v2
       
           - name: Build Docker
-            run: docker build -t rec-sys-app:v1.0 \ 
-                  --build-arg LOCATION=${{secrets.GCP_REGION}} \ 
-                  --build-arg PROJECT=${{secrets.GCP_PROJECT_ID}} \
-                  --build-arg REPOSITORY=${{secrets.PYTHON_REPOSETORY_NAME}} \
-                  --build-arg PACKAGE_NAME=${{secrets.PYTHON_PACKAGE_NAME}} \
-                  --secret id=key_repo,env=1   
-
-            
-            
-
-    
-
-
-
-    
-    
-
-    
-
-    
+            uses: docker/build-push-action@v6
+            with:
+                push: true
+                context: ./docker/
+                build-args: |
+                    LOCATION=${{ secrets.GCP_REGION }}
+                    PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+                    REPO=${{ secrets.PYTHON_REPOSETORY_NAME }}
+                    PACKAGE_NAME=${{ secrets.PYTHON_PACKAGE_NAME }}
+                secret-files:
+                    key_repo=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
+                tags: |
+                    ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.DOCKER_REPO_NAME }}/rec-sys-app:v1.0
