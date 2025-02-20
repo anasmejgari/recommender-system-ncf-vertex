@@ -11,4 +11,4 @@ RUN pip install keyrings.google-artifactregistry-auth
 
 RUN --mount=type=secret,id=key_repo,target=/run/secrets/credentials_gcp.json \ 
     GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/credentials_gcp.json \
-    pip install --extra-index-url https://${LOCATION}.pkg.dev/${PROJECT_ID}/${REPO}/simple/ ${PACKAGE_NAME}
+    pip install --extra-index-url https://${LOCATION}.pkg.dev/${PROJECT_ID}/${REPO}/simple/ rec-sys
