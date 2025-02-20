@@ -50,6 +50,7 @@ jobs:
                 push: true
                 context: ./docker/
                 build-args: |
+                    LOCATION=${{ secrets.GCP_REGION }}
                     PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
                     PACKAGE_NAME=${{ secrets.PYTHON_PACKAGE_NAME }}
                 secret-files:
