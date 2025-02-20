@@ -116,7 +116,7 @@ jobs:
               run: pip install twine keyring keyrings.google-artifactregistry-auth
             - name: Upload the artifact to google registry
               run: |
-                twine upload --repository-url ${{secrets.ARTIFACT_REGISTRY_PYPI_URL}} \
+                twine upload --repository-url ${{ secrets.ARTIFACT_REGISTRY_PYPI_URL }} \
                 --verbose dist/*.whl
     
     dockerize:
@@ -140,9 +140,6 @@ jobs:
                 "${{secrets.WIF_SA_NAME}}@${{secrets.GCP_PROJECT_ID}}.iam.gserviceaccount.com"
               create_credentials_file: true
               access_token_lifetime: 1000
-            
-          - name: credentials
-            run: cat ${{env.GOOGLE_APPLICATION_CREDENTIALS}}  
 
           - name: Login to GAR
             uses: docker/login-action@v3

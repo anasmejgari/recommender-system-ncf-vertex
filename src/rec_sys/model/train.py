@@ -122,7 +122,7 @@ def split_dataset(
 
         indices_test.extend(list(sub_ratings_movie.index))
 
-    ratings_test = ratings[indices_test]
+    ratings_test = ratings.iloc[indices_test]
     ratings_train = ratings.drop(indices_test)
     return ratings_train, ratings_test
 
