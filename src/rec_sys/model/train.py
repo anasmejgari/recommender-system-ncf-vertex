@@ -1,5 +1,7 @@
 """Module with function to train the model and preprocess datasets."""
 
+import math
+
 import numpy as np
 import pandas as pd
 import torch
@@ -48,7 +50,7 @@ def train_model(
 
             total_train_loss += loss.item()
 
-        training_rmse = torch.sqrt(total_train_loss / len(train_loader))
+        training_rmse = math.sqrt(total_train_loss / len(train_loader))
 
         print(f"Epoch {epoch}/{epochs}: RMSE = {training_rmse:.4f}.")
 
@@ -85,7 +87,7 @@ def eval_model(model: NCFRecommender, ratings_test: pd.DataFrame) -> float:
             loss = loss_fn(target, labels)
             total_valid_loss += loss.item()
 
-    avg_valid_loss = torch.sqrt(total_valid_loss / len(test_loader))
+    avg_valid_loss = math.sqrt(total_valid_loss / len(test_loader))
     print(f"RMSE for test set {avg_valid_loss}")
     return avg_valid_loss
 
