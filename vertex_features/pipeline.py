@@ -1,9 +1,10 @@
 from kfp.dsl import pipeline
 
-
+from components.config import GCP_PROJECT_ID, REPO_REGION
 from components.data_load import load_dataset
 from components.data_preprocess import preprocess
 from components.train_model import train_and_evaluate
+from components.upload_model_and_deploy import deploy_model
 
 
 @pipeline(
@@ -14,6 +15,8 @@ def rec_sys_pipeline(
     blob_ratings: str,
     blob_movies: str,
     bucket_name: str,
+    image_serving: str,
+    model_name: str,
 ):
     output_load_data = load_dataset(
         blob_movies=blob_movies, blob_ratings=blob_ratings, bucket_name=bucket_name
@@ -33,7 +36,15 @@ def rec_sys_pipeline(
     output_model = train_and_evaluate(
         n_movies=n_movies,
         n_users=n_users,
+        model_name=model_name,
         train_dataset=train_dataset,
         test_dataset=test_dataset,
     )
     model = output_model.outputs["model"]
+
+    model_endpoint = deploy_model(
+        model=model,
+        project=GCP_PROJECT_ID,
+        region=REPO_REGION,
+        serving_image=image_serving,
+    )

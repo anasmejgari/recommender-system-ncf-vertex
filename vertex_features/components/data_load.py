@@ -1,6 +1,6 @@
 """Veretex AI Pipeline."""
 
-from kfp.dsl import component, Dataset, Input, Output
+from kfp.dsl import component, Dataset, Output
 
 
 @component(base_image="python:3.12", packages_to_install=["pandas", "fsspec", "gcsfs"])
@@ -10,7 +10,7 @@ def load_dataset(
     bucket_name: str,
     output_movie_dataset: Output[Dataset],
     output_ratings_dataset: Output[Dataset],
-) -> None:
+):
     import pandas as pd
 
     bucket_uri = f"gs://{bucket_name}/"

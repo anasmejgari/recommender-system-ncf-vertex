@@ -21,6 +21,8 @@ if __name__ == "__main__":
             "blob_ratings": "ratings.csv",
             "blob_movies": "movies.csv",
             "bucket_name": "recommander-system-input-1937",
+            "model_name": "model",
+            "image_serving": "europe-docker.pkg.dev/vertex-ai/prediction/pytorch-cpu.1-11:latest",
         },
         enable_caching=True,
     ).submit(
