@@ -21,9 +21,8 @@ class ModelHandler(BaseHandler):
         self.model.eval()
 
         # Fetch parameters from model configuration (if available)
-        properties = context.manifest.get("model", {}).get("properties", {})
-        self.n_movies = int(properties.get("n_movies", 100))  # Default: 100
-        self.top_k = int(properties.get("top_k", 10))  # Default: 6
+        self.n_movies = 9742  # Default: 100
+        self.top_k = 9  # Default: 6
         # TODO Load mapping from GCS
 
         print(f"Model initialized with n_movies={self.n_movies}, top_k={self.top_k}")
