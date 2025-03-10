@@ -1,31 +1,65 @@
 """Module to handle the model for TorcheServe."""
 
+import json
+import logging
+import os
 from typing import Any
 
 import numpy as np
 import torch
 from ts.torch_handler.base_handler import BaseHandler
 
+logger = logging.getLogger(__name__)
+
 
 class ModelHandler(BaseHandler):
     """A custom model handler implementation."""
 
-    def initialize(self, context) -> None:
+    def initialize(self, ctx) -> None:
         """Initialize model. This will be called during model loading time.
 
         Args:
-            context: Initial context contains model server system properties.
+            ctx: Initial context contains model server system properties.
         """
-        model_dir = context.system_properties.get("model_dir")
-        self.model = torch.jit.load(f"{model_dir}/model.pt")
+        self.manifest = ctx.manifest
+
+        properties = ctx.system_properties
+        model_dir = ctx.system_properties.get("model_dir")
+        self.device = torch.device(
+            "cuda:" + str(properties.get("gpu_id"))
+            if torch.cuda.is_available()
+            else "cpu"
+        )
+        logger.info("Device and model directory loaded successfuly.")
+
+        # Read model serialize/pt file
+        serialized_file = self.manifest["model"]["serializedFile"]
+        model_pt_path = os.path.join(model_dir, serialized_file)
+        if not os.path.isfile(model_pt_path):
+            raise RuntimeError("Missing the model.pt or pytorch_model.bin file")
+
+        self.model = torch.jit.load(model_pt_path)
         self.model.eval()
+        logger.info("Model loaded Successfuly.")
 
-        # Fetch parameters from model configuration (if available)
-        self.n_movies = 9742  # Default: 100
-        self.top_k = 9  # Default: 6
-        # TODO Load mapping from GCS
+        # Read the mapping file, index to object name
+        hyperparams_file_path = os.path.join(model_dir, "hyperparameters.json")
+        if os.path.isfile(hyperparams_file_path):
+            with open(hyperparams_file_path) as f:
+                self.mapping = json.load(f)
+        else:
+            logger.warning(
+                "Missing the hyperparameters.json file. Inference output will default."
+            )
+            self.mapping = {"n_movies": 9742, "top_k": 10}
 
-        print(f"Model initialized with n_movies={self.n_movies}, top_k={self.top_k}")
+        self.n_movies = self.mapping["n_movies"]
+        self.top_k = self.mapping["top_k"]
+        self.initialized = True
+        logger.info(
+            f"Model initialized with n_movies={self.n_movies}, top_k={self.top_k}"
+        )
+
         self.initialized = True
 
     def preprocess(self, data: list[dict]) -> tuple[torch.LongTensor, torch.LongTensor]:
