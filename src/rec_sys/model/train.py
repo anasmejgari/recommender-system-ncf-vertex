@@ -10,6 +10,7 @@ from torch import device
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
+from rec_sys.model.logger import LOGGER_NCF
 from rec_sys.model.neural_collaborative_filtering import NCFRecommender
 from rec_sys.model.rating_dataset import RatingDataset
 
@@ -52,7 +53,7 @@ def train_model(
 
         training_rmse = math.sqrt(total_train_loss / len(train_loader))
 
-        print(f"Epoch {epoch}/{epochs}: RMSE = {training_rmse:.4f}.")
+        LOGGER_NCF.info(f"Epoch {epoch}/{epochs}: RMSE = {training_rmse:.4f}.")
 
     return model, training_rmse
 
@@ -88,7 +89,7 @@ def eval_model(model: NCFRecommender, ratings_test: pd.DataFrame) -> float:
             total_valid_loss += loss.item()
 
     avg_valid_loss = math.sqrt(total_valid_loss / len(test_loader))
-    print(f"RMSE for test set {avg_valid_loss}")
+    LOGGER_NCF.info(f"RMSE for test set {avg_valid_loss}")
     return avg_valid_loss
 
 

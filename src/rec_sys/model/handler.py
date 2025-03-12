@@ -11,6 +11,9 @@ from ts.torch_handler.base_handler import BaseHandler
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_N_MOVIES = 9742
+DEFAULT_TOP_K = 9
+
 
 class ModelHandler(BaseHandler):
     """A custom model handler implementation."""
@@ -23,14 +26,9 @@ class ModelHandler(BaseHandler):
         """
         self.manifest = ctx.manifest
 
-        properties = ctx.system_properties
         model_dir = ctx.system_properties.get("model_dir")
-        self.device = torch.device(
-            "cuda:" + str(properties.get("gpu_id"))
-            if torch.cuda.is_available()
-            else "cpu"
-        )
-        logger.info("Device and model directory loaded successfuly.")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        logger.info("Device and model directory found successfuly.")
 
         # Read model serialize/pt file
         serialized_file = self.manifest["model"]["serializedFile"]
@@ -51,7 +49,7 @@ class ModelHandler(BaseHandler):
             logger.warning(
                 "Missing the hyperparameters.json file. Inference output will default."
             )
-            self.mapping = {"n_movies": 9742, "top_k": 10}
+            self.mapping = {"n_movies": DEFAULT_N_MOVIES, "top_k": DEFAULT_TOP_K}
 
         self.n_movies = self.mapping["n_movies"]
         self.top_k = self.mapping["top_k"]
@@ -75,9 +73,13 @@ class ModelHandler(BaseHandler):
             tuple[torch.LongTensor, torch.LongTensor] : User, movie tuples
         """
         # Take output from network and post-process to desired format
-        user_id = data[0].get("id")  # Assuming input JSON has an 'id' field
+
+        user_id = (
+            data[0].get("body", [{}])[0].get("id")
+        )  # Assuming input JSON has an 'id' field
+
         if user_id is None:
-            raise ValueError("Input JSON must contain an 'id' field")
+            raise ValueError(f"Input JSON must contain an 'id' field {data}")
 
         user_tensor = torch.LongTensor(
             [user_id] * self.n_movies
@@ -97,20 +99,20 @@ class ModelHandler(BaseHandler):
             inputs (tuple[torch.LongTensor, torch.LongTensor]): List of inputs
 
         Returns:
-            list[float]: _description_
+            list[float]: list of estimated ratings from the user for each movie
         """
         with torch.no_grad():
             outputs = self.model(*inputs)  # Call model with (user_tensor, item_tensor)
         return list(outputs.cpu().numpy().tolist())
 
-    def postprocess(self, predictions: list[float]) -> list[int]:
+    def postprocess(self, predictions: list[float]) -> list[list[int]]:
         """Predict.
 
         Args:
             predictions (list[float]): Predictions
 
         Returns:
-            list[int]: _description_
+            list[int]: List of recommendations
         """
         predictions_idx = list(map(int, np.argsort(predictions)[::-1][: self.top_k]))
         # predictions = [
@@ -118,17 +120,17 @@ class ModelHandler(BaseHandler):
         #     for prediction in predictions
         #     if prediction not in known_user_items
         # ]
-        return predictions_idx
+        return [predictions_idx]
 
-    def handle(self, data: Any, context: Any) -> list[int]:
+    def handle(self, data: Any, context) -> list[list[int]]:
         """Handler.
 
         Args:
-            data (Any): _description_
-            context (Any): _description_
+            data (Any): body of the query
+            context (Any): context
 
         Returns:
-            _type_: _description_
+            list[list[int]]: List of recommendations
         """
         model_input = self.preprocess(data)
         model_output = self.inference(model_input)
