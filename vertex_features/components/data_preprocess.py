@@ -25,9 +25,11 @@ def preprocess(
     import pandas as pd
     from rec_sys.model.train import split_dataset
 
+    # Load movies
     movies = pd.read_csv(input_movies_dataset.path)
     ratings = pd.read_csv(input_ratings_dataset.path)
 
+    # Preprocess the movies data set
     dict_mapping_movies = {
         movie: idx for idx, movie in enumerate(movies["movieId"].unique())
     }
@@ -44,6 +46,7 @@ def preprocess(
     n_movies = movies["movieId"].nunique()
     n_users = ratings["userId"].nunique()
 
+    # Split data to train and test datasets
     train_data, test_data = split_dataset(ratings=ratings)
     train_data.to_csv(train_ratings_dataset.path, index=False)
     test_data.to_csv(test_ratings_dataset.path, index=False)

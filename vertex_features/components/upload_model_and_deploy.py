@@ -1,5 +1,3 @@
-from typing import NamedTuple
-
 from kfp import dsl
 from kfp.dsl import Model, Input
 
@@ -13,9 +11,7 @@ def deploy_model(
     region: str,
     serving_image: str,
 ) -> str:
-    """
-    Deploy the optimal model to a Vertex AI endpoint.
-    """
+    """Deploy the model to a Vertex AI endpoint."""
     from google.cloud import aiplatform
     import logging
 
@@ -24,7 +20,7 @@ def deploy_model(
     model_name = "ncf-recsys"
 
     logging.info(f"Model URI: {model.uri}")
-
+    # Upload the model
     model_upload = aiplatform.Model.upload(
         display_name=model_name,
         artifact_uri=model.uri,
@@ -40,8 +36,8 @@ def deploy_model(
     endpoint = aiplatform.Endpoint.create(
         display_name=model_name, project=project, location=region
     )
-
-    model_deployed = endpoint.deploy(
+    # Deploy the model to endpoint
+    endpoint.deploy(
         model=model_upload,
         deployed_model_display_name=model_name,
         traffic_percentage=100,

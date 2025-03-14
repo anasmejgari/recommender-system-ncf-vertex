@@ -19,6 +19,7 @@ def train_and_evaluate(
     learning_rate: float = 0.001,
     epochs: int = 5,
 ):
+    """Train, evaluate and package a MAR archive for the model."""
     import json
     import logging
     import os
@@ -31,6 +32,7 @@ def train_and_evaluate(
 
     logger = logging.getLogger(__name__)
 
+    # Train the model
     train_df = pd.read_csv(train_dataset.path)
     trained_model, rmse_training = load_data_and_train(
         train_df,
@@ -42,6 +44,7 @@ def train_and_evaluate(
         epochs=epochs,
     )
 
+    # Evaluate the model
     test_df = pd.read_csv(test_dataset.path)
     rmse_test = eval_model(trained_model, test_df)
     model.metadata["framework"] = "PyTorch"
@@ -62,34 +65,40 @@ def train_and_evaluate(
     scripted_model = torch.jit.trace(
         trained_model, (example_user_tensor, example_item_tensor)
     )
-    logger.info(f"The model scripted successfully.")
 
-    # PT file -> MAR file
+    # For the endpoint, we need to have a MAR Archive
+    # TorchServe needs the MAR File
+    # We need: - SerializedFile (.pt) for the model
+    #          - Handler(.py) file for PyTorch model
+    #          - hyperparameters file
+    # They need to be placed in a unique location
+    # Then run th torch model archiver command
     with tempfile.TemporaryDirectory(delete=False) as tmpdirname:
+        # Serialized file
         model_path = os.path.join(tmpdirname, "model.pt")
         scripted_model.save(model_path)
-        logger.info(f"The model path is: {model_path}. Model saved succefully.")
 
+        # Handler file with BaseHandler class for TochServe
         handler_path = os.path.join(tmpdirname, "handler.py")
         copy_handler_file(handler_path)
-        logger.info(f"The handler path is: {handler_path}. Handler saved succefully.")
 
+        # Hyperparameters file in json format
         hyperparameters = {"n_movies": 9742, "top_k": 9}
         hyperparameters_path_json = os.path.join(tmpdirname, "hyperparameters.json")
         with open(hyperparameters_path_json, "w") as fp:
             json.dump(hyperparameters, fp)
-        logger.info(
-            f"The hyperparameter path is: {hyperparameters_path_json}. Hyperparameters saved succefully."
+
+        # Build the MAR archive
+        command = " ".join(
+            [
+                "torch-model-archiver",
+                f"--model-name {model_name}",
+                f"--version 1.0",
+                f"--serialized-file {model_path}",
+                f"--handler {handler_path}",
+                f"--export-path {model_dir}",
+                f"--extra-files {hyperparameters_path_json}",
+            ]
         )
-
-        with open(hyperparameters_path_json) as f:
-            d = json.load(f)
-            logger.info(f"The hyperparameters are {json.dumps(d)}")
-
-        command = f"""torch-model-archiver --model-name {model_name} --version 1.0 --serialized-file {model_path} --handler {handler_path} --export-path {model_dir} --extra-files {hyperparameters_path_json}"""
         os.system(command)
         logger.info("Command executed successfuly.")
-
-    logger.info(f"Temp directory content {os.listdir(tmpdirname)}")
-    if os.path.isdir(model_dir):
-        logger.info(f"Main directory content {os.listdir(model_dir)}")

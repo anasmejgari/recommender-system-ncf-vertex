@@ -5,10 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "cinemagoer>=2023.5.1",
     "flask>=3.1.0",
     "google-cloud-aiplatform>=1.80.0",
     "google-cloud-pipeline-components>=2.18.0",
     "google-cloud-storage>=2.19.0",
+    "imdbpy>=2022.7.9",
     "joblib>=1.4.2",
     "kfp>=2.10.1",
     "nox>=2025.2.9",
@@ -23,7 +25,7 @@ dependencies = [
 ]
 
 [project.scripts]
-rec-sys = "rec_sys:main"
+rec-sys = "rec_sys.app.main:run_app"
 
 [build-system]
 requires = ["hatchling"]
